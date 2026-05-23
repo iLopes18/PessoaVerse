@@ -16,9 +16,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'timeline' | 'bau'>('timeline');
   const [globalTranslate, setGlobalTranslate] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [feedScrollPosition, setFeedScrollPosition] = useState<number>(0);
   
   const handleProfileClick = (id: string) => {
+    setFeedScrollPosition(window.scrollY);
     setSelectedProfileId(id);
+    window.scrollTo({ top: 0 });
   };
   
   // Progress tracker of discovered heteronyms
@@ -220,43 +223,49 @@ export default function App() {
 
         {/* 3. CORE ROUTING RENDERING ENGINE */}
         <main className="flex-1">
-          {activeTab === 'timeline' && (
-            <div className="space-y-6">
-              <Timeline 
-                posts={posts}
-                setPosts={setPosts}
-                unlockedList={unlockedList}
-                unlockHeteronym={unlockHeteronym}
-                allHeteronyms={ALL_HETERONYMS}
-                globalTranslate={globalTranslate}
-                onProfileClick={handleProfileClick}
-              />
-            </div>
-          )}
-
-          {activeTab === 'bau' && (
-            <BauPessoa 
-              allHeteronyms={ALL_HETERONYMS}
-              unlockedList={unlockedList}
-              setUnlockedList={setUnlockedList}
-              onProfileClick={handleProfileClick}
+          {selectedProfileId && activeProfileHeteronym ? (
+            <ProfileModal
+              heteronym={activeProfileHeteronym}
+              isOpen={!!selectedProfileId}
+              onClose={() => {
+                setSelectedProfileId(null);
+                setTimeout(() => {
+                  window.scrollTo({ top: feedScrollPosition, behavior: 'auto' });
+                }, 10);
+              }}
+              isUnlocked={unlockedList.includes(selectedProfileId)}
+              posts={posts}
+              onUnlock={() => unlockHeteronym(selectedProfileId, activeProfileHeteronym.name)}
+              onPostClick={handlePostClick}
             />
+          ) : (
+            <>
+              {activeTab === 'timeline' && (
+                <div className="space-y-6">
+                  <Timeline 
+                    posts={posts}
+                    setPosts={setPosts}
+                    unlockedList={unlockedList}
+                    unlockHeteronym={unlockHeteronym}
+                    allHeteronyms={ALL_HETERONYMS}
+                    globalTranslate={globalTranslate}
+                    onProfileClick={handleProfileClick}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'bau' && (
+                <BauPessoa 
+                  allHeteronyms={ALL_HETERONYMS}
+                  unlockedList={unlockedList}
+                  setUnlockedList={setUnlockedList}
+                  onProfileClick={handleProfileClick}
+                />
+              )}
+            </>
           )}
         </main>
       </div>
-
-      {/* Profile Modal Overlay Window */}
-      {selectedProfileId && activeProfileHeteronym && (
-        <ProfileModal
-          heteronym={activeProfileHeteronym}
-          isOpen={!!selectedProfileId}
-          onClose={() => setSelectedProfileId(null)}
-          isUnlocked={unlockedList.includes(selectedProfileId)}
-          posts={posts}
-          onUnlock={() => unlockHeteronym(selectedProfileId, activeProfileHeteronym.name)}
-          onPostClick={handlePostClick}
-        />
-      )}
 
       {/* 4. VISUAL REWARD DISCOVERY MODAL ALERT (Poetadex Unlocked!) */}
       <AnimatePresence>
