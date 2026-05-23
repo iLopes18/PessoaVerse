@@ -1,0 +1,6 @@
+{
+  "name": "PessoaVerse",
+  "description": "Uma rede social simulada dos heterónimos de Fernando Pessoa, oferecendo um Baú colecionável de mais de 130 personalidades e tradução de poemas para calão da Geração Z.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
