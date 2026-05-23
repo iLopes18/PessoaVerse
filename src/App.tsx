@@ -237,6 +237,7 @@ export default function App() {
               posts={posts}
               onUnlock={() => unlockHeteronym(selectedProfileId, activeProfileHeteronym.name)}
               onPostClick={handlePostClick}
+              unlockedList={unlockedList}
             />
           ) : (
             <>

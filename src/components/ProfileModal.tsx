@@ -13,6 +13,7 @@ interface ProfileModalProps {
   posts: Post[];
   onUnlock: () => void;
   onPostClick?: (postId: string) => void;
+  unlockedList?: string[];
 }
 
 export default function ProfileModal({
@@ -22,7 +23,8 @@ export default function ProfileModal({
   isUnlocked,
   posts,
   onUnlock,
-  onPostClick
+  onPostClick,
+  unlockedList = []
 }: ProfileModalProps) {
   const [activeTab, setActiveTab ] = useState<'info' | 'posts'>('info');
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -411,21 +413,28 @@ export default function ProfileModal({
                     {selectedPost.comments && selectedPost.comments.length > 0 ? (
                       <div className="space-y-2.5">
                         {selectedPost.comments.map((c, cIdx) => {
-                          const resolvedAuthor = resolveCommentAuthor(c);
+                          const resolvedAuthor = resolveCommentAuthor(c, ALL_HETERONYMS);
                           const commentName = resolvedAuthor.authorName;
                           const commentAvatar = resolvedAuthor.authorAvatar;
                           const commentHandle = resolvedAuthor.handle;
+                          const commentCategory = resolvedAuthor.authorCategory;
+                          const commentAuthorId = resolvedAuthor.authorId;
+
+                          const isUncovered = unlockedList.includes(commentAuthorId) || commentCategory === 'VERIFICADOS';
+
                           return (
                             <div key={c.id || `c_${cIdx}_${commentHandle}`} className="p-3 bg-slate-950/40 border border-slate-850 rounded-xl text-xs flex gap-2.5 items-start">
                               <img
                                 src={commentAvatar}
                                 alt={commentName}
-                                className="w-7 h-7 rounded-full object-cover border border-slate-800 shrink-0"
+                                className={`w-7 h-7 rounded-full object-cover border border-slate-800 shrink-0 ${
+                                  !isUncovered ? 'grayscale contrast-[1.5] brightness-75' : ''
+                                }`}
                                 referrerPolicy="no-referrer"
                               />
                               <div className="flex-1">
                                 <div className="flex items-center justify-between mb-0.5">
-                                  <span className="font-bold text-white">@{commentHandle}</span>
+                                  <span className="font-bold text-white">@{isUncovered ? commentHandle : '???'}</span>
                                   <span className="text-[9px] font-mono text-slate-500">{c.timestamp}</span>
                                 </div>
                                 <p className="text-slate-300 leading-normal">{c.content}</p>

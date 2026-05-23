@@ -385,20 +385,11 @@ export default function Timeline({
                                   </span>
                                 )}
                               </div>
-                              <span className="text-[10px] text-slate-500 font-mono">@{commentHandle}</span>
+                              <span className="text-[10px] text-slate-500 font-mono">@{isUncovered ? commentHandle : '???'}</span>
                             </div>
 
-                            <p className="text-xs text-slate-300 leading-relaxed font-sans">
-                              {isUncovered ? (
-                                comment.content
-                              ) : (
-                                <span 
-                                  onClick={() => handleAvatarClick(comment)}
-                                  className="text-cyan-400 underline font-semibold font-mono cursor-pointer hover:text-cyan-300 transition-colors"
-                                >
-                                  [🔒 HETERÓNIMO BLOQUEADO. Clica aqui para desvendar rascunho e adicionar ao teu Baú!]
-                                </span>
-                              )}
+                            <p className="text-xs text-slate-300 leading-relaxed font-sans mt-1">
+                              {comment.content}
                             </p>
 
                             <div className="flex gap-4.5 mt-3 items-center">
