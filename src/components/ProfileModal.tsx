@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Calendar, Compass, Sparkles, CheckCircle2, UserCheck, UserPlus, Grid, BookOpen, Heart, MessageCircle, ArrowLeft } from 'lucide-react';
 import { Heteronym, Post } from '../types';
+import { resolveCommentAuthor } from '../utils/commentResolver';
+import { ALL_HETERONYMS } from '../data/heteronyms';
 
 interface ProfileModalProps {
   heteronym: Heteronym;
@@ -303,18 +305,27 @@ export default function ProfileModal({
               <div className="w-full md:w-1/2 flex flex-col h-[50vh] md:h-full overflow-y-auto bg-slate-900">
                 {/* Header info */}
                 <div className="p-4 border-b border-slate-800/80 flex items-center justify-between sticky top-0 bg-slate-900 z-10">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={selectedPost.authorAvatar}
-                      alt={selectedPost.authorName}
-                      className="w-9 h-9 rounded-full object-cover border border-slate-700"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div>
-                      <h4 className="text-xs font-bold text-white leading-tight">{selectedPost.authorName}</h4>
-                      <p className="text-[10px] text-cyan-400 font-mono">@{selectedPost.handle}</p>
-                    </div>
-                  </div>
+                  {(() => {
+                    const postAuthor = ALL_HETERONYMS.find(h => h.id === selectedPost.authorId) || heteronym;
+                    const displayAuthorName = postAuthor?.name || selectedPost.authorName || 'Utilizador';
+                    const displayAuthorAvatar = postAuthor?.avatar || selectedPost.authorAvatar;
+                    const displayAuthorHandle = postAuthor?.handle || selectedPost.handle || 'utilizador';
+
+                    return (
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={displayAuthorAvatar}
+                          alt={displayAuthorName}
+                          className="w-9 h-9 rounded-full object-cover border border-slate-700"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div>
+                          <h4 className="text-xs font-bold text-white leading-tight">{displayAuthorName}</h4>
+                          <p className="text-[10px] text-cyan-400 font-mono">@{displayAuthorHandle}</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
                   
                   {/* Close button for post modal */}
                   <button
@@ -399,15 +410,29 @@ export default function ProfileModal({
                     <h5 className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">Historial de Comentários</h5>
                     {selectedPost.comments && selectedPost.comments.length > 0 ? (
                       <div className="space-y-2.5">
-                        {selectedPost.comments.map(c => (
-                          <div key={c.id} className="p-3 bg-slate-955/50 border border-slate-800 rounded-xl text-xs bg-slate-950/40">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-bold text-white">@{c.handle}</span>
-                              <span className="text-[9px] font-mono text-slate-500">{c.timestamp}</span>
+                        {selectedPost.comments.map((c, cIdx) => {
+                          const resolvedAuthor = resolveCommentAuthor(c);
+                          const commentName = resolvedAuthor.authorName;
+                          const commentAvatar = resolvedAuthor.authorAvatar;
+                          const commentHandle = resolvedAuthor.handle;
+                          return (
+                            <div key={c.id || `c_${cIdx}_${commentHandle}`} className="p-3 bg-slate-950/40 border border-slate-850 rounded-xl text-xs flex gap-2.5 items-start">
+                              <img
+                                src={commentAvatar}
+                                alt={commentName}
+                                className="w-7 h-7 rounded-full object-cover border border-slate-800 shrink-0"
+                                referrerPolicy="no-referrer"
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-0.5">
+                                  <span className="font-bold text-white">@{commentHandle}</span>
+                                  <span className="text-[9px] font-mono text-slate-500">{c.timestamp}</span>
+                                </div>
+                                <p className="text-slate-300 leading-normal">{c.content}</p>
+                              </div>
                             </div>
-                            <p className="text-slate-300 leading-normal">{c.content}</p>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
                       <p className="text-[10.5px] font-mono text-slate-500 italic text-center py-4">Sem comentários guardados de outros heterónimos.</p>

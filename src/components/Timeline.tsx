@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, MessageCircle, CheckCircle2, Languages, AlertCircle, Sparkles, Smile, BookOpen, X } from 'lucide-react';
 import { Post, Comment, Heteronym } from '../types';
+import { resolveCommentAuthor } from '../utils/commentResolver';
 
 interface TimelineProps {
   posts: Post[];
@@ -126,19 +127,20 @@ export default function Timeline({
   };
 
   const handleAvatarClick = (comment: Comment) => {
-    const commentAuthor = allHeteronyms.find(h => h.id === comment.authorId);
-    const commentName = commentAuthor?.name || comment.authorName || 'Outro Rascunho';
-    const commentCategory = commentAuthor?.category || comment.authorCategory || 'NPCS';
+    const resolvedAuthor = resolveCommentAuthor(comment, allHeteronyms);
+    const commentName = resolvedAuthor.authorName;
+    const commentCategory = resolvedAuthor.authorCategory;
+    const commentAuthorId = resolvedAuthor.authorId;
 
     const isNPC = commentCategory === 'NPCS' || commentCategory === 'RAROS' || commentCategory === 'ATIVOS';
-    if (isNPC && comment.authorId !== 'visitante') {
-      const alreadyUnlocked = unlockedList.includes(comment.authorId);
+    if (isNPC && commentAuthorId !== 'visitante') {
+      const alreadyUnlocked = unlockedList.includes(commentAuthorId);
       if (!alreadyUnlocked) {
-        unlockHeteronym(comment.authorId, commentName);
+        unlockHeteronym(commentAuthorId, commentName);
       } else {
         alert(`💫 O heterónimo ${commentName} já está desbloqueado no teu Baú!`);
       }
-    } else if (comment.authorId === 'visitante') {
+    } else if (commentAuthorId === 'visitante') {
       alert('👤 Entraste como Visitante Anónimo. Explora os outros utilizadores com avatares cinzentos para desbloquear heterónimos reais!');
     } else {
       alert(`📚 ${commentName} é um dos 4 Heterónimos Centrais já desbloqueados por padrão no teu Baú de Pessoa.`);
@@ -336,17 +338,18 @@ export default function Timeline({
                   </div>
 
                   <div className="space-y-4">
-                    {post.comments.map((comment) => {
-                      const commentAuthor = allHeteronyms.find(h => h.id === comment.authorId);
-                      const commentName = commentAuthor?.name || comment.authorName || 'Outro Rascunho';
-                      const commentAvatar = commentAuthor?.avatar || comment.authorAvatar;
-                      const commentHandle = commentAuthor?.handle || comment.handle;
-                      const commentCategory = commentAuthor?.category || comment.authorCategory || 'NPCS';
+                    {post.comments.map((comment, commentIdx) => {
+                      const resolvedAuthor = resolveCommentAuthor(comment, allHeteronyms);
+                      const commentName = resolvedAuthor.authorName;
+                      const commentAvatar = resolvedAuthor.authorAvatar;
+                      const commentHandle = resolvedAuthor.handle;
+                      const commentCategory = resolvedAuthor.authorCategory;
+                      const commentAuthorId = resolvedAuthor.authorId;
 
-                      const isUncovered = unlockedList.includes(comment.authorId) || commentCategory === 'VERIFICADOS';
+                      const isUncovered = unlockedList.includes(commentAuthorId) || commentCategory === 'VERIFICADOS';
 
                       return (
-                        <div key={comment.id} className="flex gap-3 text-slate-300">
+                        <div key={comment.id || `comment_${commentIdx}_${commentHandle}`} className="flex gap-3 text-slate-300">
                           {/* Clicking the avatar triggers Poetadex unlock flow */}
                           <button
                             onClick={() => handleAvatarClick(comment)}

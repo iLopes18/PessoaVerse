@@ -1,8 +1,8 @@
 export type HeteronymCategory = 'VERIFICADOS' | 'ATIVOS' | 'RAROS' | 'NPCS';
 
 export interface Comment {
-  id: string;
-  authorId: string;
+  id?: string;
+  authorId?: string;
   authorName?: string;
   authorAvatar?: string;
   authorCategory?: HeteronymCategory;
