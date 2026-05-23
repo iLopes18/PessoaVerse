@@ -17,7 +17,7 @@ export const camposPosts: Post[] = [
     id: 'post_campos_1',
     authorId: 'campos',
     handle: 'alvaro_campos',
-    imageUrl: '../public/campos_ode_triunfal.jpg',
+    imageUrl: 'https://unsplash.com/photos/aerial-view-of-boat-on-sea-during-daytime-fXMPeqbTOvM',
     title: 'Opiário',
     content: 'É antes do ópio que a minh’alma é doente. Sentir a vida convalesce e estiola E eu vou buscar ao ópio que consola Um Oriente ao oriente do Oriente.',
     fullPoemText: poemasCampos.opiario,
